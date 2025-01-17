@@ -199,11 +199,14 @@ async function getSelfIp() {
  */
 async function getSelfUrl(path = "") {
   if (config.url) {
-    return `${config.url}/${path}`;
+    return new URL(path, config.url);
   } else {
-    const port = config.port || 8890;
-    const ip = await getSelfIp();
-    return `http://${ip}:${port}/${path}`;
+    let ip = await getSelfIp();
+    ip = ip.includes(".") ? ip : `[${ip}]`
+    // URL does not accept just the IP without the protocol
+    const url = new URL(path, `http://${ip}`)
+    url.port = config.port ?? 8890
+    return url;
   }
 }
 
